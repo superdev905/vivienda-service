@@ -6,7 +6,7 @@ load_dotenv()
 
 def get_db_url(env: str) -> str:
     if env == "production":
-        return os.getenv("DATABASE_URL_DEV_PROD")
+        return os.getenv("DATABASE_URL_PROD")
 
     return os.getenv("DATABASE_URL_DEV")
 
