@@ -74,48 +74,32 @@ class Commune(BaseModel):
         orm_mode = True
 
 
-class Otec(BaseModel):
-    business_name: str = Field(alias="businessName")
-    rut: str
-    address: str
-    latitude: float
-    longitude: float
-    region_id: int = Field(alias="regionId")
-    commune_id: int = Field(alias="communeId")
-    phone: Optional[str]
-    email: str
-    contact: str
+class Interlocutor(BaseModel):
     id: int
-    region: Region
-    commune: Commune
-
-
-class Attachment (BaseModel):
-    file_name: str = Field(alias="fileName")
-    file_key: str = Field(alias="fileKey")
-    file_url: str = Field(alias="fileUrl")
-    file_size: str = Field(alias="fileSize")
-    upload_date: datetime = Field(alias="uploadDate")
+    full_name: str
+    charge_id: int
+    charge_name: str
+    email: str
+    cell_phone: str
+    office_phone: str
+    other_phone: str
+    business_id: int
+    is_interlocutor: bool
 
     class Config:
-        orm_mode = True
         allow_population_by_field_name = True
 
 
-class CourseDetails(BaseModel):
-    code: str
-    name: str
-    create_date: datetime = Field(alias="createDate")
-    otec_id: Optional[int] = Field(alias="otecId")
-    instructor_id: int = Field(alias="instructorId")
-    description: str
-    benefit_id: int = Field(alias="benefitId")
+class BussinessResponse(BaseModel):
+    rut: str
     id: int
-    state: str
-    created_by: User = Field(alias="createdBy")
-    instructor: Optional[User] = Field(alias="instructor")
-    otec: Optional[Otec]
-    time_ago: str = Field(alias="timeAgo")
+    address: str
+    email: str
+    type: str
+    business_name: str = Field(alias="businessName")
+    region: Region
+    commune: Commune
+    interlocutor: Optional[Interlocutor]
 
     class Config:
         allow_population_by_field_name = True

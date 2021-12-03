@@ -1,12 +1,10 @@
-from typing import Optional
 from fastapi import status, Request, APIRouter
-from starlette.responses import StreamingResponse
 from fastapi.encoders import jsonable_encoder
-from fastapi.param_functions import Depends, Query
+from fastapi.param_functions import Depends
 from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.session import Session
-from sqlalchemy.sql.elements import and_, or_
+from sqlalchemy.sql.elements import or_
 from fastapi_pagination import Params, Page
 from fastapi_pagination.ext.sqlalchemy import paginate
 from app.database.main import get_database
@@ -18,21 +16,61 @@ from ...helpers.humanize_date import get_time_ago
 from ...helpers.schema import SuccessResponse
 from .model import Agreement, Professional, RelatedBusiness
 from ..employees.model import Employee
-from .schema import AgreementItem, AgreementCreate
-from .services import create_items
+from .schema import AgreementDetails, AgreementItem, AgreementCreate
+from .services import create_employees, create_items
 
 
-router = APIRouter(prefix="/agreement",
+stat_router = APIRouter(prefix="/stats",
+                        tags=["Estadisticas"],
+                        dependencies=[Depends(JWTBearer())])
+
+
+@stat_router.get("")
+def get_stats(db: Session = Depends(get_database)):
+    agreements = db.query(Agreement).count()
+
+    return {
+        "agreements": agreements,
+        "owners": 0,
+        "employees": db.query(Employee).count()
+    }
+
+
+router = APIRouter(prefix="/agreements",
                    tags=["Convenios"],
                    dependencies=[Depends(JWTBearer())])
 
 
 @router.get("", response_model=Page[AgreementItem])
 def get_all(req: Request,
+            search: str = None,
             db: Session = Depends(get_database),
             pag_params: Params = Depends()):
+    filters = []
+    if search:
+        formatted_search = "{}%".format(search)
+        filters.append(Agreement.business_name.ilike(formatted_search))
 
-    return paginate(db.query(Agreement).options(joinedload(Agreement.professionals)), pag_params)
+    return paginate(db.query(Agreement).filter(or_(*filters)).options(joinedload(Agreement.professionals)), pag_params)
+
+
+@router.get("/{id}", response_model=AgreementDetails)
+def get_one(req: Request,
+            id: int,
+            db: Session = Depends(get_database)):
+    found_agreement = db.query(Agreement).filter(Agreement.id == id).options(
+        joinedload(Agreement.professionals), joinedload(Agreement.related_businesses)).first()
+
+    if not found_agreement:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="No existe un convenio con este id: %s".format(id))
+    author = fetch_users_service(req.token, found_agreement.created_by)
+
+    business = get_business_data(req, found_agreement.business_id)
+
+    return {**found_agreement.__dict__,
+            "author": author,
+            "business": business}
 
 
 @router.post("", response_model=AgreementItem)
@@ -40,6 +78,12 @@ def create(req: Request,
            body: AgreementCreate,
            db: Session = Depends(get_database)):
     user_id = req.user_id
+
+    found_agreement = db.query(Agreement).filter(
+        Agreement.business_id == body.business_id).first()
+    if found_agreement:
+        raise HTTPException(
+            detail="Esta empresa ya tiene un convenio creado:", status_code=status.HTTP_400_BAD_REQUEST)
 
     employees = body.employees
     professionals = body.professionals
@@ -60,7 +104,7 @@ def create(req: Request,
     db.flush(db_agreement)
 
     create_items(db, Professional, professionals, db_agreement.id, user_id)
-    create_items(db, Employee, employees, db_agreement.id, user_id)
+    create_employees(db, Employee, employees, db_agreement.id, user_id)
     create_items(db, RelatedBusiness, related_businesses,
                  db_agreement.id, user_id)
 

@@ -8,6 +8,6 @@ services:
     volumes:
       - .:/app
     ports:
-      - 5111:80
+      - 5112:80
     extra_hosts:
       - "host.docker.internal:host-gateway"
