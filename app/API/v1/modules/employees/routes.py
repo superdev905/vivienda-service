@@ -39,7 +39,7 @@ def get_all(search: str = None,
 def get_one(id: int,
             db: Session = Depends(get_database)):
 
-    employee = db.query(Employee).filter(Employee.id == id).first()
+    employee = db.query(Employee).filter(Employee.employee_id == id).first()
 
     if not employee:
         raise HTTPException(
