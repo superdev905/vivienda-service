@@ -50,7 +50,7 @@ def add_employee(req: Request,
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="No existe un anexo con este id: %s".format(id))
 
-    found_employee = db.query(Employee).first(and_(
+    found_employee = db.query(Employee).filter(and_(
         Employee.annexed_id == id, Employee.employee_id == body.employee_id)).first()
 
     if found_employee:
@@ -59,7 +59,7 @@ def add_employee(req: Request,
 
     new_employee = jsonable_encoder(body, by_alias=False)
     new_employee["created_by"] = req.user_id
-    new_employee["annexed_id"] = req.id
+    new_employee["annexed_id"] = id
     db_employee = Employee(**new_employee)
 
     db.add(db_employee)

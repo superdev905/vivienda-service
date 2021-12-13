@@ -16,6 +16,7 @@ def create_phases(db: Session, employee_id: int, user_id: int):
         employee_phase = jsonable_encoder(phase)
         employee_phase["created_by"] = user_id
         employee_phase["employee_id"] = employee_id
+        employee_phase["status"] = "PENDIENTE"
         employee_phase["is_locked"] = False if phase["name"] == "AHORRO" else True
 
         db_phase = EmployeePhase(**employee_phase)
