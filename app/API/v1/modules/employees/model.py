@@ -9,12 +9,13 @@ class Employee(Base, AuthorMixin, TimestampMixin):
     __tablename__ = "employee"
     id = Column(Integer, primary_key=True, unique=True, autoincrement=True)
     employee_id = Column(Integer, nullable=False)
+    employee_rut = Column(String(12), nullable=False)
     fullname = Column(String(200), nullable=False)
-    agreement_id = Column(Integer, ForeignKey("agreement.id"), nullable=False)
+    annexed_id = Column(Integer, ForeignKey(
+        "agreement_annexed.id"), nullable=False)
     is_active = Column(Boolean, nullable=False, default=True)
-
-    agreement = relationship(
-        "Agreement", back_populates="employees", lazy="select")
+    annexed = relationship(
+        "AgreementAnnexed", back_populates="employees", lazy="select")
     savings = relationship(
         "EmployeeSaving", back_populates="employee", lazy="select")
     diagnostics = relationship(

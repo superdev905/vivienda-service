@@ -24,7 +24,7 @@ router = APIRouter(prefix="/employees",
 
 @router.get("", response_model=Page[EmployeeItem])
 def get_all(search: str = None,
-            agreement_id: int = Query(None, alias="agreementId"),
+            annexed_id: int = Query(None, alias="annexedId"),
             db: Session = Depends(get_database),
             pag_params: Params = Depends()):
 
@@ -32,7 +32,7 @@ def get_all(search: str = None,
     if search:
         formatted_search = "{}%".format(search)
         filters.append(Employee.fullname.ilike(formatted_search))
-    return paginate(db.query(Employee).filter(or_(*filters, Employee.agreement_id == agreement_id)), pag_params)
+    return paginate(db.query(Employee).filter(or_(*filters, Employee.annexed_id == annexed_id)), pag_params)
 
 
 @router.get("/{id}", response_model=EmployeeDetails)

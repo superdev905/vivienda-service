@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import List, Optional
 from pydantic import BaseModel, Field
-from ...helpers.schema import User, BussinessResponse
-from ..annexes.schema import AnnexedCreate, AnnexedItem
+from ...helpers.schema import Region, Commune, User, BussinessResponse
+from ..employees.schema import EmployeeCreate
 
 
 class RelatedBusinessBase(BaseModel):
@@ -43,23 +43,33 @@ class AgreementBase(BaseModel):
         allow_population_by_field_name = True
 
 
-class AgreementCreate(AgreementBase):
-    annexed: AnnexedCreate
+class AnnexedBase(BaseModel):
+    employees: List[EmployeeCreate]
+    related_businesses: List[RelatedBusinessCreate]
+    professionals: List[ProfessionalCreate]
+    observations: str
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+
+
+class AnnexedCreate(AnnexedBase):
     pass
 
 
-class AgreementItem(AgreementBase):
+class AnnexedCreateAgreement(AnnexedCreate):
+    agreement_id: int = Field(alias="agreementId")
+    date: datetime
+
+
+class AnnexedItem(AnnexedBase):
     id: int
-    is_active: bool = Field(alias="isActive")
+    total_employees: int = Field(alias="totalEmployees")
+    state: str
+    created_at: datetime = Field(alias="createDate")
 
-    class Config:
-        allow_population_by_field_name = True
 
-
-class AgreementDetails(AgreementItem):
-    annexes: Optional[List[AnnexedItem]]
+class AnnexedDetails(AnnexedItem):
     author: User
-    business: BussinessResponse
-
-    class Config:
-        allow_population_by_field_name = True
+    employees: Optional[List[EmployeeCreate]]

@@ -53,6 +53,7 @@ class DiagnosticItem(DiagnosticBase):
 
 class EmployeeBase(BaseModel):
     employee_id: int = Field(alias="employeeId")
+    employee_rut: str = Field(alias="employeeRut")
     fullname: str = Field(alias="fullName")
 
     class Config:

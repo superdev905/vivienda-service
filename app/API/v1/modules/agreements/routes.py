@@ -14,10 +14,10 @@ from ...helpers.fetch_data import fetch_service, fetch_users_service, get_busine
 from ...helpers.crud import get_updated_obj
 from ...helpers.humanize_date import get_time_ago
 from ...helpers.schema import SuccessResponse
-from .model import Agreement, Professional, RelatedBusiness
+from .model import Agreement
 from ..employees.model import Employee
 from .schema import AgreementDetails, AgreementItem, AgreementCreate
-from .services import create_employees, create_items
+from .services import create_annexed
 
 
 stat_router = APIRouter(prefix="/stats",
@@ -50,8 +50,9 @@ def get_all(req: Request,
     if search:
         formatted_search = "{}%".format(search)
         filters.append(Agreement.business_name.ilike(formatted_search))
+        filters.append(Agreement.number.ilike(formatted_search))
 
-    return paginate(db.query(Agreement).filter(or_(*filters)).options(joinedload(Agreement.professionals)), pag_params)
+    return paginate(db.query(Agreement).filter(or_(*filters)), pag_params)
 
 
 @router.get("/{id}", response_model=AgreementDetails)
@@ -59,7 +60,7 @@ def get_one(req: Request,
             id: int,
             db: Session = Depends(get_database)):
     found_agreement = db.query(Agreement).filter(Agreement.id == id).options(
-        joinedload(Agreement.professionals), joinedload(Agreement.related_businesses)).first()
+        joinedload(Agreement.annexes)).first()
 
     if not found_agreement:
         raise HTTPException(
@@ -85,28 +86,20 @@ def create(req: Request,
         raise HTTPException(
             detail="Esta empresa ya tiene un convenio creado:", status_code=status.HTTP_400_BAD_REQUEST)
 
-    employees = body.employees
-    professionals = body.professionals
-    related_businesses = body.related_businesses
+    annexed = body.annexed
 
     new_agreement = jsonable_encoder(body, by_alias=False)
 
-    del new_agreement["employees"]
-    del new_agreement["professionals"]
-    del new_agreement["related_businesses"]
+    del new_agreement["annexed"]
 
     new_agreement["created_by"] = user_id
-    new_agreement["total_employees"] = len(employees)
     db_agreement = Agreement(**new_agreement)
 
     db.add(db_agreement)
     db.commit()
     db.flush(db_agreement)
 
-    create_items(db, Professional, professionals, db_agreement.id, user_id)
-    create_employees(db, Employee, employees, db_agreement.id, user_id)
-    create_items(db, RelatedBusiness, related_businesses,
-                 db_agreement.id, user_id)
+    create_annexed(db, annexed, db_agreement.id, user_id, body.date)
 
     return db_agreement
 

@@ -5,7 +5,7 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm.session import Session
 from app.database.base import Base
 from ..phases.services import create_phases
-from .model import AgreementAnnexed, Professional, RelatedBusiness
+from ..agreements.model import AgreementAnnexed, Professional, RelatedBusiness
 from ..employees.model import Employee
 
 
@@ -32,6 +32,8 @@ def create_annexed(db: Session, data, agreement_id: int, user_id: int, date: dat
     create_employees(db, Employee, employees, db_annexed.id, user_id)
     create_items(db, RelatedBusiness, related_businesses,
                  db_annexed.id, user_id)
+
+    return db_annexed
 
 
 def create_items(db: Session, Model: Base, list: List, annexed_id: int, user_id: int):
