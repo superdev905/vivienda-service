@@ -73,3 +73,6 @@ class AnnexedItem(AnnexedBase):
 class AnnexedDetails(AnnexedItem):
     author: User
     employees: Optional[List[EmployeeCreate]]
+    professionals: Optional[List[User]]
+    related_businesses: Optional[List[BussinessResponse]] = Field(
+        alias="relatedBusinesses")

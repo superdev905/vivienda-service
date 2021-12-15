@@ -20,12 +20,13 @@ class Agreement(Base, AuthorMixin, TimestampMixin):
 class AgreementAnnexed(Base, AuthorMixin, TimestampMixin):
     __tablename__ = "agreement_annexed"
     id = Column(Integer, primary_key=True, unique=True, autoincrement=True)
+    agreement_id = Column(Integer, ForeignKey(
+        "agreement.id"), primary_key=True, nullable=False)
     date = Column(DateTime(timezone=True), nullable=False)
     is_active = Column(Boolean, nullable=False, default=True)
     state = Column(String(8), nullable=False, default="DRAFT")
     observations = Column(String(800), nullable=False)
     total_employees = Column(Integer, nullable=False)
-    agreement_id = Column(Integer, ForeignKey("agreement.id"), nullable=False)
     employees = relationship(
         "Employee", back_populates="annexed", lazy="select")
     related_businesses = relationship(
@@ -33,7 +34,7 @@ class AgreementAnnexed(Base, AuthorMixin, TimestampMixin):
     professionals = relationship(
         "Professional", back_populates="annexed", lazy="select")
     agreement = relationship(
-        "Agreement", back_populates="annexes", lazy="select")
+        "Agreement", back_populates="annexes", foreign_keys=[agreement_id], lazy="select")
 
 
 class RelatedBusiness(Base, AuthorMixin, TimestampMixin):

@@ -61,4 +61,4 @@ def create_employees(db: Session, Model: Base, list: List, annexed_id: int, user
         db.commit()
         db.refresh(db_item)
 
-        create_phases(db, db_item.id, user_id)
+        create_phases(db, db_item.employee_id, user_id)

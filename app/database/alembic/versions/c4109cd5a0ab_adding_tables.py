@@ -1,8 +1,8 @@
 """adding tables
 
-Revision ID: 136f4d1faeb0
+Revision ID: c4109cd5a0ab
 Revises: 
-Create Date: 2021-12-13 05:50:15.010043
+Create Date: 2021-12-15 06:15:46.303486
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '136f4d1faeb0'
+revision = 'c4109cd5a0ab'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -33,21 +33,20 @@ def upgrade():
     )
     op.create_table('agreement_annexed',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('agreement_id', sa.Integer(), nullable=False),
     sa.Column('date', sa.DateTime(timezone=True), nullable=False),
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('state', sa.String(length=8), nullable=False),
     sa.Column('observations', sa.String(length=800), nullable=False),
     sa.Column('total_employees', sa.Integer(), nullable=False),
-    sa.Column('agreement_id', sa.Integer(), nullable=False),
     sa.Column('created_by', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('update_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.ForeignKeyConstraint(['agreement_id'], ['agreement.id'], ),
-    sa.PrimaryKeyConstraint('id'),
+    sa.PrimaryKeyConstraint('id', 'agreement_id'),
     sa.UniqueConstraint('id')
     )
     op.create_table('employee',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('employee_id', sa.Integer(), nullable=False),
     sa.Column('employee_rut', sa.String(length=12), nullable=False),
     sa.Column('fullname', sa.String(length=200), nullable=False),
@@ -57,8 +56,9 @@ def upgrade():
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('update_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.ForeignKeyConstraint(['annexed_id'], ['agreement_annexed.id'], ),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('id')
+    sa.PrimaryKeyConstraint('employee_id'),
+    sa.UniqueConstraint('employee_id'),
+    sa.UniqueConstraint('employee_rut')
     )
     op.create_table('professional',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -103,7 +103,7 @@ def upgrade():
     sa.Column('created_by', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('update_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.ForeignKeyConstraint(['employee_id'], ['employee.id'], ),
+    sa.ForeignKeyConstraint(['employee_id'], ['employee.employee_id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('id')
     )
@@ -120,7 +120,7 @@ def upgrade():
     sa.Column('created_by', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('update_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.ForeignKeyConstraint(['employee_id'], ['employee.id'], ),
+    sa.ForeignKeyConstraint(['employee_id'], ['employee.employee_id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('id')
     )
@@ -134,7 +134,7 @@ def upgrade():
     sa.Column('created_by', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('update_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.ForeignKeyConstraint(['employee_id'], ['employee.id'], ),
+    sa.ForeignKeyConstraint(['employee_id'], ['employee.employee_id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('id')
     )

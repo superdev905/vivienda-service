@@ -66,7 +66,6 @@ class EmployeeCreate(EmployeeBase):
 
 
 class EmployeeItem(EmployeeBase):
-    id: int
     is_active: str = Field(alias="isActive")
     created_at: datetime = Field(alias="createdDate")
 

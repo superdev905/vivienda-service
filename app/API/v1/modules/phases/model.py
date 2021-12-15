@@ -13,7 +13,8 @@ class EmployeePhase(Base, AuthorMixin, TimestampMixin):
     status = Column(String(10))
     start_date = Column(DateTime(timezone=True))
     end_date = Column(DateTime(timezone=True))
-    employee_id = Column(Integer, ForeignKey("employee.id"), nullable=False)
+    employee_id = Column(Integer, ForeignKey(
+        "employee.employee_id"), nullable=False)
     is_active = Column(Boolean, nullable=False, default=True)
     is_locked = Column(Boolean, nullable=False, server_default="0")
 

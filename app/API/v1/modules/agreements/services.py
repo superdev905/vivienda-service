@@ -28,8 +28,8 @@ def create_annexed(db: Session, data, agreement_id: int, user_id: int, date: dat
     db.commit()
     db.refresh(db_annexed)
 
-    create_items(db, Professional, professionals, db_annexed.id, user_id)
     create_employees(db, Employee, employees, db_annexed.id, user_id)
+    create_items(db, Professional, professionals, db_annexed.id, user_id)
     create_items(db, RelatedBusiness, related_businesses,
                  db_annexed.id, user_id)
 
@@ -59,4 +59,4 @@ def create_employees(db: Session, Model: Base, list: List, annexed_id: int, user
         db.commit()
         db.refresh(db_item)
 
-        create_phases(db, db_item.id, user_id)
+        create_phases(db, db_item.employee_id, user_id)

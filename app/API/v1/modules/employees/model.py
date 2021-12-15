@@ -7,9 +7,9 @@ from sqlalchemy import Column, Integer, String
 
 class Employee(Base, AuthorMixin, TimestampMixin):
     __tablename__ = "employee"
-    id = Column(Integer, primary_key=True, unique=True, autoincrement=True)
-    employee_id = Column(Integer, nullable=False)
-    employee_rut = Column(String(12), nullable=False)
+    employee_id = Column(Integer, primary_key=True,
+                         unique=True, nullable=False)
+    employee_rut = Column(String(12), unique=True, nullable=False)
     fullname = Column(String(200), nullable=False)
     annexed_id = Column(Integer, ForeignKey(
         "agreement_annexed.id"), nullable=False)
@@ -30,7 +30,8 @@ class EmployeeSaving(Base, AuthorMixin, TimestampMixin):
     entity = Column(String(30), nullable=False)
     account_number = Column(String(50), nullable=False)
     amount = Column(Float,  nullable=False)
-    employee_id = Column(Integer, ForeignKey("employee.id"), nullable=False)
+    employee_id = Column(Integer, ForeignKey(
+        "employee.employee_id"), nullable=False)
     is_active = Column(Boolean, nullable=False, default=True)
 
     employee = relationship(
@@ -51,7 +52,8 @@ class EmployeeDiagnostic(Base, AuthorMixin, TimestampMixin):
     marital_status_id = Column(Integer, nullable=False)
     salary = Column(Float,  nullable=False)
     contract_type = Column(String(50),  nullable=False)
-    employee_id = Column(Integer, ForeignKey("employee.id"), nullable=False)
+    employee_id = Column(Integer, ForeignKey(
+        "employee.employee_id"), nullable=False)
     is_active = Column(Boolean, nullable=False, default=True)
 
     employee = relationship(

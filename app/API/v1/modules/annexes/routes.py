@@ -7,7 +7,7 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.session import Session
 from app.database.main import get_database
 from ...middlewares.auth import JWTBearer
-from ...helpers.fetch_data import fetch_users_service
+from ...helpers.fetch_data import fetch_users_service, get_business_data
 from .schema import AnnexedCreateAgreement, AnnexedDetails, AnnexedItem
 from .services import create_annexed, create_phases, AgreementAnnexed
 from ..employees.model import Employee
@@ -50,6 +50,12 @@ def add_employee(req: Request,
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="No existe un anexo con este id: %s".format(id))
 
+    employee = db.query(Employee).filter(
+        Employee.employee_id == body.employee_id).first()
+    if employee:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Este empleado ya esta registrado en otro anexo o convenio")
+
     found_employee = db.query(Employee).filter(and_(
         Employee.annexed_id == id, Employee.employee_id == body.employee_id)).first()
 
@@ -66,7 +72,15 @@ def add_employee(req: Request,
     db.commit()
     db.refresh(db_employee)
 
-    create_phases(db, db_employee.id, req.user_id)
+    create_phases(db, db_employee.employee_id, req.user_id)
+
+    employees = len(db.query(Employee).filter(Employee.annexed_id == id).all())
+
+    found_annexed.total_employees = employees
+
+    db.add(found_annexed)
+    db.commit()
+    db.refresh(found_annexed)
 
     return db_employee
 
@@ -83,8 +97,22 @@ def get_one(req: Request,
             status_code=status.HTTP_400_BAD_REQUEST, detail="No existe un anexo con este id: %s".format(id))
     author = fetch_users_service(req.token, found_annexed.created_by)
 
+    professionals = []
+
+    for item in found_annexed.professionals:
+        professional = fetch_users_service(req.token, item.user_id)
+        professionals.append(professional)
+
+    related_businesses = []
+
+    for i in found_annexed.related_businesses:
+        business = get_business_data(req, i.business_id)
+        related_businesses.append(business)
+
     return {**found_annexed.__dict__,
-            "author": author, }
+            "author": author,
+            "professionals": professionals,
+            "related_businesses": related_businesses}
 
 
 @router.post("", response_model=AnnexedItem)

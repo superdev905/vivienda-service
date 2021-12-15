@@ -12,8 +12,13 @@ class SuccessResponse(BaseModel):
 class User (BaseModel):
     id: int
     names: str
+    email: str
     paternal_surname: str = Field(alias='paternalSurname')
     maternal_surname: str = Field(alias='maternalSurname')
+    charge_name: Optional[str] = Field(alias="charge")
+
+    class Config:
+        allow_population_by_field_name = True
 
 
 class PaginationResponse (BaseModel):
