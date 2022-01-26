@@ -99,7 +99,7 @@ class BussinessResponse(BaseModel):
     rut: str
     id: int
     address: str
-    email: str
+    email: Optional[str]
     type: str
     business_name: str = Field(alias="businessName")
     region: Region
