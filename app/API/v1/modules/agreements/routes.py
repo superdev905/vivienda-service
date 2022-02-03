@@ -1,4 +1,4 @@
-from fastapi import status, Request, APIRouter
+from fastapi import status, Request, APIRouter, Query
 from fastapi.encoders import jsonable_encoder
 from fastapi.param_functions import Depends
 from fastapi.exceptions import HTTPException
@@ -55,6 +55,27 @@ def get_all(req: Request,
     return paginate(db.query(Agreement).filter(or_(*filters)), pag_params)
 
 
+@router.get("/employees")
+def get_one(req: Request,
+            business_id: int = Query(None, alias="businessId"),
+            db: Session = Depends(get_database)):
+
+    business = get_business_data(req, business_id)
+    if business["social_service"] == "NO":
+        return []
+    found_agreement = db.query(Agreement).filter(Agreement.business_id == business_id).options(
+        joinedload(Agreement.annexes)).first()
+
+    if not found_agreement:
+        return []
+    result = []
+    for i in found_agreement.annexes:
+        for emp in i.employees:
+            result.append(emp)
+
+    return result
+
+
 @router.get("/{id}", response_model=AgreementDetails)
 def get_one(req: Request,
             id: int,
@@ -102,24 +123,6 @@ def create(req: Request,
     create_annexed(db, annexed, db_agreement.id, user_id, body.date)
 
     return db_agreement
-
-
-# @router.get("/{id}", response_model=ScheduleDetails)
-# def get_one(req: Request,
-#             id: int,
-#             db: Session = Depends(get_database)):
-#     found_schedule = db.query(Schedule).filter(Schedule.id == id).first()
-
-#     if not found_schedule:
-#         raise HTTPException(
-#             detail="No existe una programación con este id: " + str(id), status_code=status.HTTP_400_BAD_REQUEST)
-#     business = get_business_data(req, found_schedule.business_id)
-#     boss = fetch_users_service(
-#         req.token, found_schedule.boss_id)
-
-#     return {**found_schedule.__dict__,
-#             "business": business,
-#             "boss": boss}
 
 
 # @router.get("/{id}/report")
