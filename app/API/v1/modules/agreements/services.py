@@ -49,14 +49,25 @@ def create_items(db: Session, Model: Base, list: List, annexed_id: int, user_id:
 
 def create_employees(db: Session, Model: Base, list: List, annexed_id: int, user_id: int):
     for item in list:
-        new_item = jsonable_encoder(item, by_alias=False)
-        new_item["created_by"] = user_id
-        new_item["annexed_id"] = annexed_id
 
-        db_item = Model(**new_item)
+        doc = None
+        emp = db.query(Model).filter(
+            Model.employee_id == item.employee_id).first()
 
-        db.add(db_item)
-        db.commit()
-        db.refresh(db_item)
+        if not emp:
 
-        create_phases(db, db_item.employee_id, user_id)
+            new_item = jsonable_encoder(item, by_alias=False)
+            new_item["created_by"] = user_id
+            new_item["annexed_id"] = annexed_id
+
+            db_item = Model(**new_item)
+
+            db.add(db_item)
+            db.commit()
+            db.refresh(db_item)
+
+            doc = db_item
+        else:
+            doc = emp
+
+        create_phases(db, doc.employee_id, user_id)

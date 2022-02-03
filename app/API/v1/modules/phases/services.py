@@ -2,13 +2,14 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm.session import Session
 from .model import EmployeePhase
 
-DEFAULT_PHASES = [{"name": "AHORRO", "level": 1},
-                  {"name": "POSTULACIÓN", "level": 2},
-                  {"name": "OBTENCIÓN SUBSIDIO", "level": 3},
-                  {"name": "BUSQUEDA VIVIENDA", "level": 4},
-                  {"name": "CRÉDITO", "level": 5},
-                  {"name": "ESCRITURACIÓN", "level": 6},
-                  {"name": "PROPIETARIO", "level": 7}]
+DEFAULT_PHASES = [{"name": "BONO ARRIENDO", "level": 1},
+                  {"name": "AHORRO", "level": 2},
+                  {"name": "POSTULACIÓN", "level": 3},
+                  {"name": "OBTENCIÓN SUBSIDIO", "level": 4},
+                  {"name": "BUSQUEDA VIVIENDA", "level": 5},
+                  {"name": "CRÉDITO", "level": 6},
+                  {"name": "ESCRITURACIÓN", "level": 7},
+                  {"name": "PROPIETARIO", "level": 8}]
 
 
 def create_phases(db: Session, employee_id: int, user_id: int):
