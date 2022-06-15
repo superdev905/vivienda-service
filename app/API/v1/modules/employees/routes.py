@@ -54,6 +54,25 @@ def get_one(id: int,
             "saving": saving,
             "diagnostic": diagnostic}
 
+@router.put("/edit/{id}", response_model=EmployeeItem)
+def edit_one(id: int,
+             db: Session = Depends(get_database)):
+
+    employee = db.query(Employee).filter(Employee.employee_id == id).first()
+
+    if not employee:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="No existe un trabajador con este id: %s".format(id))
+    
+    new_employee = employee
+    new_employee["is_active"] = 'false'
+
+    db_employee = Employee(**new_employee)
+    db.add(db_employee)
+    db.commit()
+    db.refresh(db_employee)
+
+    return db_employee
 
 @router.post("/{id}/saving", response_model=SavingItem)
 def create_saving(req: Request,
