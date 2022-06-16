@@ -32,7 +32,7 @@ def get_all(search: str = None,
     if search:
         formatted_search = "{}%".format(search)
         filters.append(Employee.fullname.ilike(formatted_search))
-    return paginate(db.query(Employee).filter(or_(*filters, Employee.annexed_id == annexed_id, Employee.is_active == 'true')), pag_params)
+    return paginate(db.query(Employee).filter(or_(*filters, Employee.annexed_id == annexed_id, Employee.is_active == True)), pag_params)
 
 
 @router.get("/{id}", response_model=EmployeeDetails)
