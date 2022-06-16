@@ -66,7 +66,7 @@ def edit_one(id: int,
             status_code=status.HTTP_400_BAD_REQUEST, detail="No existe un trabajador con este id: %s".format(id))
     
     new_employee = jsonable_encoder(employee)
-    new_employee["is_active"] = 'false'
+    new_employee["is_active"] = False
 
     db_employee = Employee(**new_employee)
     db.add(db_employee)
